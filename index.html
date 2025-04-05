@@ -567,32 +567,12 @@
     </style>
 </head>
 <body>
-<!-- Login Screen -->
 <div id="login-container">
-    <h1>WebOS Login</h1>
-    <form class="login-form" onsubmit="return handleAuth(event)">
-        <input type="text" id="username" placeholder="Benutzername" required>
-        <input type="password" id="password" placeholder="Passwort" required>
-        <button type="submit" id="submit-btn">Anmelden</button>
-        <button type="button" onclick="toggleRegister()" id="toggle-btn">Registrieren</button>
-    </form>
+    <!-- Login-Inhalt -->
 </div>
 
-<!-- Desktop -->
 <div id="desktop" style="display: none;">
-    <div id="top-bar">
-        <div id="system-time"></div>
-        <div>
-            <span>🔋 100%</span>
-        </div>
-    </div>
-
-    <div id="dock">
-        <img src="settings.png" class="app-icon" onclick="openApp('settings')">
-        <img src="calc.png" class="app-icon" onclick="openApp('calculator')">
-        <img src="pong.png" class="app-icon" onclick="openApp('pong')">
-        <img src="texteditor.png" class="app-icon" onclick="openApp('textEditor')">
-    </div>
+    <!-- Desktop-Inhalt -->
 </div>
 
 <script>
@@ -604,29 +584,42 @@
         document.getElementById('toggle-btn').textContent = isRegistering ? 'Zurück zum Login' : 'Registrieren';
     }
 
+    if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify({}));
+    }
+
     function handleAuth(e) {
         e.preventDefault();
+
         const users = JSON.parse(localStorage.getItem('users') || '{}');
+        console.log('Benutzer:', users);
+
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
 
+        console.log('Eingegebener Benutzername:', username);
+        console.log('Eingegebenes Passwort:', password);
+
         if (!username || !password) {
-            alert('Bitte Benutzernamen und Passwort eingeben!');
+            alert('Bitte geben Sie einen Benutzernamen und ein Passwort ein!');
             return;
         }
 
         if (isRegistering) {
-            if (users[username]) return alert('Benutzer existiert bereits!');
+            if (users[username]) {
+                alert('Benutzername existiert bereits!');
+                return;
+            }
             users[username] = password;
             localStorage.setItem('users', JSON.stringify(users));
-            alert('Registrierung erfolgreich!');
+            alert('Registrierung erfolgreich! Sie können sich jetzt anmelden.');
             toggleRegister();
         } else {
             if (users[username] === password) {
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('desktop').style.display = 'block';
             } else {
-                alert('Falsche Anmeldedaten!');
+                alert('Falscher Benutzername oder falsches Passwort!');
             }
         }
     }
@@ -1771,6 +1764,9 @@
 
     // Beim Laden ausführen
     document.addEventListener('DOMContentLoaded', loadSavedSettings);
+
+    const icon = 'path/to/icon.png';
+    const html = `<img src="${icon}" alt="Icon">`; // Stelle sicher, dass icon korrekt definiert ist
 </script>
 </body>
 </html>
