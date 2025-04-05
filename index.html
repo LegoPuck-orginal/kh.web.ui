@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>WebDesktop OS</title>
+    <style>
+        :root {
+            --primary-color: #0066ff;
+            --window-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: url('background.png') center/cover;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Login Page */
+        #login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: white;
+        }
+
+        .login-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Top Bar */
+        #top-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            align-items: center;
+        }
+
+        /* Dock */
+        #dock {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 15px;
+        }
+
+        .app-icon {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        /* Fenster */
+        .window {
+            position: absolute;
+            min-width: 300px;
+            border-radius: 12px;
+            background: var(--window-bg);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .window-header {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .window-content {
+            padding: 15px;
+            height: calc(100% - 40px);
+        }
+
+        /* Taschenrechner */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            width: 250px;
+        }
+
+        /* Spiele */
+        .game-canvas {
+            width: 600px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+<!-- Login Screen -->
+<div id="login-container">
+    <h1>WebOS Login</h1>
+    <form class="login-form" onsubmit="return handleAuth(event)">
+        <input type="text" id="username" placeholder="Benutzername" required>
+        <input type="password" id="password" placeholder="Passwort" required>
+        <button type="submit" id="submit-btn">Anmelden</button>
+        <button type="button" onclick="toggleRegister()" id="toggle-btn">Registrieren</button>
+    </form>
+</div>
+
+<!-- Desktop -->
+<div id="desktop" style="display: none;">
+    <div id="top-bar">
+        <div id="system-time"></div>
+        <div>
+            <span>🔋 100%</span>
+        </div>
+    </div>
+
+    <div id="dock">
+        <img src="settings.png" class="app-icon" onclick="openApp('settings')">
+        <img src="calc.png" class="app-icon" onclick="openApp('calculator')">
+        <img src="pong.png" class="app-icon" onclick="openApp('pong')">
+    </div>
+</div>
+
+<script>
+    // Login System
+    let isRegistering = false;
+    function toggleRegister() {
+        isRegistering = !isRegistering;
+        document.getElementById('submit-btn').textContent = isRegistering ? 'Registrieren' : 'Anmelden';
+        document.getElementById('toggle-btn').textContent = isRegistering ? 'Zurück zum Login' : 'Registrieren';
+    }
+
+    function handleAuth(e) {
+        e.preventDefault();
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (isRegistering) {
+            if (users[username]) return alert('Benutzer existiert bereits!');
+            users[username] = password;
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('Registrierung erfolgreich!');
+            toggleRegister();
+        } else {
+            if (users[username] === password) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('desktop').style.display = 'block';
+            } else {
+                alert('Falsche Anmeldedaten!');
+            }
+        }
+    }
+
+    // Desktop System
+    let zIndex = 1;
+    const apps = {
+        settings: {
+            title: 'Einstellungen',
+            html: `
+                    <div class="window-content">
+                        <h3>Hintergrund</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <img src="background.png" style="width:100px;cursor:pointer;"
+                                 onclick="changeWallpaper('background.png')">
+                            <div style="background:#666;width:100px;height:60px;cursor:pointer;"
+                                 onclick="changeWallpaper('#666')"></div>
+                            <div style="background:linear-gradient(45deg, #ff6b6b, #4ecdc4);width:100px;height:60px;cursor:pointer;"
+                                 onclick="changeWallpaper('linear-gradient(45deg, #ff6b6b, #4ecdc4)')"></div>
+                        </div>
+                    </div>
+                `
+        },
+        calculator: {
+            title: 'Rechner',
+            html: `
+                    <div class="window-content">
+                        <input type="text" id="calc-display" readonly style="width:100%;margin-bottom:10px;padding:5px;">
+                        <div class="calculator-grid">
+                            <button onclick="clearDisplay()">C</button>
+                            <button onclick="appendToDisplay('%')">%</button>
+                            <button onclick="appendToDisplay('/')">/</button>
+                            <button onclick="appendToDisplay('*')">×</button>
+                            <button onclick="appendToDisplay('7')">7</button>
+                            <button onclick="appendToDisplay('8')">8</button>
+                            <button onclick="appendToDisplay('9')">9</button>
+                            <button onclick="appendToDisplay('-')">-</button>
+                            <button onclick="appendToDisplay('4')">4</button>
+                            <button onclick="appendToDisplay('5')">5</button>
+                            <button onclick="appendToDisplay('6')">6</button>
+                            <button onclick="appendToDisplay('+')">+</button>
+                            <button onclick="appendToDisplay('1')">1</button>
+                            <button onclick="appendToDisplay('2')">2</button>
+                            <button onclick="appendToDisplay('3')">3</button>
+                            <button onclick="calculate()" style="grid-row: span 2">=</button>
+                            <button onclick="appendToDisplay('0')" style="grid-column: span 2">0</button>
+                            <button onclick="appendToDisplay('.')">.</button>
+                        </div>
+                    </div>
+                `
+        },
+        pong: {
+            title: 'Pong',
+            html: `<canvas class="game-canvas" id="pong-canvas"></canvas>`
+        }
+    };
+
+    // Wallpaper System
+    function changeWallpaper(source) {
+        document.body.style.background = source;
+        localStorage.setItem('wallpaper', source);
+    }
+
+    // Load saved wallpaper
+    const savedWallpaper = localStorage.getItem('wallpaper');
+    if (savedWallpaper) changeWallpaper(savedWallpaper);
+
+    // Window Management
+    function createWindow(app) {
+        const window = document.createElement('div');
+        window.className = 'window';
+        window.innerHTML = `
+                <div class="window-header">
+                    <span>${app.title}</span>
+                    <div>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                    </div>
+                </div>
+                ${app.html}
+            `;
+
+        document.body.appendChild(window);
+        makeDraggable(window);
+        window.style.zIndex = zIndex++;
+        return window;
+    }
+
+    function makeDraggable(element) {
+        const header = element.querySelector('.window-header');
+        header.onmousedown = function(e) {
+            let offsetX = e.clientX - element.offsetLeft;
+            let offsetY = e.clientY - element.offsetTop;
+
+            function move(e) {
+                element.style.left = (e.clientX - offsetX) + 'px';
+                element.style.top = (e.clientY - offsetY) + 'px';
+            }
+
+            document.onmousemove = move;
+            document.onmouseup = () => document.onmousemove = null;
+        };
+    }
+
+    // Calculator Logic
+    function appendToDisplay(value) {
+        document.getElementById('calc-display').value += value;
+    }
+
+    function clearDisplay() {
+        document.getElementById('calc-display').value = '';
+    }
+
+    function calculate() {
+        try {
+            const result = eval(document.getElementById('calc-display').value);
+            document.getElementById('calc-display').value = result;
+        } catch {
+            alert('Ungültige Rechnung!');
+        }
+    }
+
+    // Pong Game
+    class PongGame {
+        constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.width = 600;
+            this.height = 400;
+
+            this.paddleHeight = 60;
+            this.paddleWidth = 10;
+            this.ballSize = 8;
+
+            this.reset();
+            this.init();
+        }
+
+        reset() {
+            this.playerScore = 0;
+            this.computerScore = 0;
+            this.ball = {
+                x: this.width/2,
+                y: this.height/2,
+                dx: 5,
+                dy: 5
+            };
+        }
+
+        init() {
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+
+            this.canvas.addEventListener('mousemove', e => {
+                const rect = this.canvas.getBoundingClientRect();
+                this.playerY = e.clientY - rect.top - this.paddleHeight/2;
+            });
+
+            this.gameLoop();
+        }
+
+        gameLoop() {
+            this.update();
+            this.draw();
+            requestAnimationFrame(() => this.gameLoop());
+        }
+
+        update() {
+            this.ball.x += this.ball.dx;
+            this.ball.y += this.ball.dy;
+
+            // Computer AI
+            this.computerY = this.ball.y - this.paddleHeight/2;
+
+            // Collisions
+            if (this.ball.y <= 0 || this.ball.y >= this.height) this.ball.dy *= -1;
+            if (this.ball.x <= this.paddleWidth && this.ball.y >= this.playerY &&
+                this.ball.y <= this.playerY + this.paddleHeight) this.ball.dx *= -1;
+            if (this.ball.x >= this.width - this.paddleWidth &&
+                this.ball.y >= this.computerY &&
+                this.ball.y <= this.computerY + this.paddleHeight) this.ball.dx *= -1;
+
+            // Scoring
+            if (this.ball.x <= 0) {
+                this.computerScore++;
+                this.resetBall();
+            }
+            if (this.ball.x >= this.width) {
+                this.playerScore++;
+                this.resetBall();
+            }
+        }
+
+        draw() {
+            this.ctx.fillStyle = 'black';
+            this.ctx.fillRect(0, 0, this.width, this.height);
+
+            // Paddles
+            this.ctx.fillStyle = 'white';
+            this.ctx.fillRect(0, this.playerY, this.paddleWidth, this.paddleHeight);
+            this.ctx.fillRect(this.width - this.paddleWidth, this.computerY, this.paddleWidth, this.paddleHeight);
+
+            // Ball
+            this.ctx.beginPath();
+            this.ctx.arc(this.ball.x, this.ball.y, this.ballSize, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Score
+            this.ctx.font = '30px Arial';
+            this.ctx.fillText(this.playerScore, 50, 50);
+            this.ctx.fillText(this.computerScore, this.width - 70, 50);
+        }
+
+        resetBall() {
+            this.ball = {
+                x: this.width/2,
+                y: this.height/2,
+                dx: 5 * (Math.random() > 0.5 ? 1 : -1),
+                dy: 5
+            };
+        }
+    }
+
+    // App Starter
+    function openApp(appName) {
+        const app = apps[appName];
+        if (!app) return;
+
+        const window = createWindow(app);
+        if (appName === 'pong') new PongGame(window.querySelector('canvas'));
+    }
+
+    // Systemzeit
+    function updateTime() {
+        document.getElementById('system-time').textContent =
+            new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+</body>
+</html>
