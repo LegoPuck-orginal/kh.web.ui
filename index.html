@@ -5,8 +5,12 @@
     <title>WebDesktop OS</title>
     <style>
         :root {
-            --primary-color: #0066ff;
+            --primary-color: #0084ff;
+            --accent-color: #00c2ff;
             --window-bg: rgba(255, 255, 255, 0.95);
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         body {
@@ -14,7 +18,47 @@
             height: 100vh;
             overflow: hidden;
             background: url('background.png') center/cover;
-            font-family: Arial, sans-serif;
+            font-family: var(--font-family);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            --primary-color: #00a8ff;
+            --accent-color: #39c0ff;
+            --window-bg: rgba(28, 28, 30, 0.95);
+            --shadow-color: rgba(0, 0, 0, 0.25);
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        body.dark-mode .window {
+            background: rgba(28, 28, 30, 0.92);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .window-header {
+            background: rgba(45, 45, 48, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode #dock {
+            background: rgba(45, 45, 48, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode #top-bar {
+            background: rgba(28, 28, 30, 0.8);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode #editor-toolbar button,
+        body.dark-mode #editor-toolbar select,
+        body.dark-mode #editor-toolbar input {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
         }
 
         /* Login Page */
@@ -24,91 +68,233 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
             color: white;
         }
 
         .login-form {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.2rem;
+            min-width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .login-form input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-form button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .login-form button:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
         }
 
         /* Top Bar */
         #top-bar {
-            height: 30px;
+            height: 40px;
             background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 24px;
             align-items: center;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         /* Dock */
         #dock {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.8);
-            padding: 10px 20px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
+            padding: 12px 18px;
+            border-radius: 24px;
+            backdrop-filter: blur(12px);
             display: flex;
-            gap: 15px;
+            gap: 16px;
+            box-shadow: 0 6px 20px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
         }
 
         .app-icon {
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             cursor: pointer;
-            transition: transform 0.2s;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 5px;
+            transition: all 0.2s ease;
+            border-radius: 14px;
+            padding: 6px;
+        }
+
+        .app-icon:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow-color);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         /* Fenster */
         .window {
             position: absolute;
-            min-width: 300px;
-            border-radius: 12px;
+            min-width: 340px;
+            border-radius: var(--border-radius);
             background: var(--window-bg);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 40px var(--shadow-color);
             overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            transform: scale(0.98);
+            opacity: 0.95;
+        }
+
+        .window:hover {
+            transform: scale(1);
+            opacity: 1;
         }
 
         .window-header {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.9);
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: move;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .window-header button {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: #ff5f57;
+            color: rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .window-header button:hover {
+            background: #ff3b30;
         }
 
         .window-content {
-            padding: 15px;
-            height: calc(100% - 40px);
+            padding: 20px;
+            height: calc(100% - 52px);
         }
 
         /* Taschenrechner */
         .calculator-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            width: 250px;
+            gap: 8px;
+            width: 280px;
+        }
+
+        .calculator-grid button {
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #f1f1f1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calculator-grid button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #calc-display {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            text-align: right;
+            border: 1px solid #ddd;
+            border-radius: 8px;
         }
 
         /* Spiele */
         .game-canvas {
-            width: 600px;
-            height: 400px;
+            width: 640px;
+            height: 420px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        /* Editor Toolbar */
+        #editor-toolbar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        #editor-toolbar button, 
+        #editor-toolbar select, 
+        #editor-toolbar input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #editor-toolbar button:hover, 
+        #editor-toolbar select:hover, 
+        #editor-toolbar input:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        #editor {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            height: 320px;
+            overflow-y: auto;
+            background: white;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        body.dark-mode #editor {
+            background: #2c2c2e;
+            color: #fff;
+            border-color: #444;
         }
     </style>
 </head>
@@ -137,7 +323,7 @@
         <img src="settings.png" class="app-icon" onclick="openApp('settings')">
         <img src="calc.png" class="app-icon" onclick="openApp('calculator')">
         <img src="pong.png" class="app-icon" onclick="openApp('pong')">
-        <img src="pacman.png" class="app-icon" onclick="openApp('pacman')">
+        <img src="texteditor.png" class="app-icon" onclick="openApp('textEditor')">
     </div>
 </div>
 
@@ -179,74 +365,65 @@
             title: 'Einstellungen',
             html: `
                 <div class="window-content">
-                    <h3>Hintergrund</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <img src="background.png" style="width:100px;cursor:pointer;"
-                             onclick="changeWallpaper('background.png')">
-                        <div style="background:#666;width:100px;height:60px;cursor:pointer;"
-                             onclick="changeWallpaper('#666')"></div>
-                        <div style="background:linear-gradient(45deg, #ff6b6b, #4ecdc4);width:100px;height:60px;cursor:pointer;"
-                             onclick="changeWallpaper('linear-gradient(45deg, #ff6b6b, #4ecdc4)')"></div>
-                    </div>
-                    <button onclick="resetWallpaper()" style="margin-top: 10px;">Hintergrund zurücksetzen</button>
-                    
-                    <h3>Schriftgröße</h3>
-                    <select id="font-size-selector" onchange="changeFontSize(this.value)">
-                        <option value="16px">Standard</option>
-                        <option value="14px">Klein</option>
-                        <option value="18px">Groß</option>
-                        <option value="20px">Sehr groß</option>
-                    </select>
-                    
-                    <h3>Primärfarbe</h3>
-                    <input type="color" id="primary-color-picker" value="#0066ff" onchange="changePrimaryColor(this.value)">
-                    
-                    <h3>Hintergrundfarbe</h3>
-                    <input type="color" id="background-color-picker" value="#ffffff" onchange="changeBackgroundColor(this.value)">
-                    
-                    <h3>Pac-Man Geschwindigkeit</h3>
-                    <input type="range" id="pacman-speed" min="1" max="5" value="2" onchange="changePacmanSpeed(this.value)">
-                    
-                    <h3>Geister Geschwindigkeit</h3>
-                    <input type="range" id="ghost-speed" min="1" max="5" value="2" onchange="changeGhostSpeed(this.value)">
+                    <h3>Design</h3>
+                    <label>
+                        <input type="checkbox" id="dark-mode-switch" onchange="toggleDarkMode(this.checked)">
+                        Dark Mode
+                    </label>
                 </div>
             `
         },
         calculator: {
             title: 'Rechner',
             html: `
-                    <div class="window-content">
-                        <input type="text" id="calc-display" readonly style="width:100%;margin-bottom:10px;padding:5px;">
-                        <div class="calculator-grid">
-                            <button onclick="clearDisplay()">C</button>
-                            <button onclick="appendToDisplay('%')">%</button>
-                            <button onclick="appendToDisplay('/')">/</button>
-                            <button onclick="appendToDisplay('*')">×</button>
-                            <button onclick="appendToDisplay('7')">7</button>
-                            <button onclick="appendToDisplay('8')">8</button>
-                            <button onclick="appendToDisplay('9')">9</button>
-                            <button onclick="appendToDisplay('-')">-</button>
-                            <button onclick="appendToDisplay('4')">4</button>
-                            <button onclick="appendToDisplay('5')">5</button>
-                            <button onclick="appendToDisplay('6')">6</button>
-                            <button onclick="appendToDisplay('+')">+</button>
-                            <button onclick="appendToDisplay('1')">1</button>
-                            <button onclick="appendToDisplay('2')">2</button>
-                            <button onclick="appendToDisplay('3')">3</button>
-                            <button onclick="calculate()" style="grid-row: span 2">=</button>
-                            <button onclick="appendToDisplay('0')" style="grid-column: span 2">0</button>
-                            <button onclick="appendToDisplay('.')">.</button>
-                        </div>
+                <div class="window-content">
+                    <input id="calc-display" type="text" readonly>
+                    <div class="calculator-grid">
+                        <button onclick="appendToDisplay('1')">1</button>
+                        <button onclick="appendToDisplay('2')">2</button>
+                        <button onclick="appendToDisplay('3')">3</button>
+                        <button onclick="clearDisplay()">C</button>
+                        <button onclick="appendToDisplay('4')">4</button>
+                        <button onclick="appendToDisplay('5')">5</button>
+                        <button onclick="appendToDisplay('6')">6</button>
+                        <button onclick="appendToDisplay('+')">+</button>
+                        <button onclick="appendToDisplay('7')">7</button>
+                        <button onclick="appendToDisplay('8')">8</button>
+                        <button onclick="appendToDisplay('9')">9</button>
+                        <button onclick="appendToDisplay('-')">-</button>
+                        <button onclick="appendToDisplay('0')">0</button>
+                        <button onclick="appendToDisplay('.')">.</button>
+                        <button onclick="calculate()">=</button>
+                        <button onclick="appendToDisplay('*')">*</button>
                     </div>
-                `
+                </div>
+            `
         },
         pong: {
             title: 'Pong',
             html: `<canvas class="game-canvas" id="pong-canvas"></canvas>`
         },
-        pacman: {
-            title: 'Pac-Man',
-            html: `<canvas class="game-canvas" id="pacman-canvas"></canvas>`
+        textEditor: {
+            title: 'Texteditor',
+            html: `
+                <div class="window-content">
+                    <div id="editor-toolbar">
+                        <button onclick="execCommand('bold')"><b>B</b></button>
+                        <button onclick="execCommand('italic')"><i>I</i></button>
+                        <button onclick="execCommand('underline')"><u>U</u></button>
+                        <select onchange="execCommand('fontSize', this.value)">
+                            <option value="1">Klein</option>
+                            <option value="3" selected>Mittel</option>
+                            <option value="5">Groß</option>
+                        </select>
+                        <input type="color" onchange="execCommand('foreColor', this.value)">
+                        <button onclick="saveText()">Speichern</button>
+                    </div>
+                    <div id="editor" contenteditable="true" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto;">
+                        Hier kannst du deinen Text bearbeiten...
+                    </div>
+                </div>
+            `
         }
     };
 
@@ -291,17 +468,6 @@
         localStorage.setItem('backgroundColor', color);
     }
 
-    // Pac-Man Speed System
-    let pacmanSpeed = 2;
-    function changePacmanSpeed(speed) {
-        pacmanSpeed = parseInt(speed);
-        localStorage.setItem('pacmanSpeed', speed);
-    }
-
-    // Load saved Pac-Man speed
-    const savedPacmanSpeed = localStorage.getItem('pacmanSpeed');
-    if (savedPacmanSpeed) changePacmanSpeed(savedPacmanSpeed);
-
     // Ghost Speed System
     let ghostSpeed = 2;
     function changeGhostSpeed(speed) {
@@ -313,19 +479,37 @@
     const savedGhostSpeed = localStorage.getItem('ghostSpeed');
     if (savedGhostSpeed) changeGhostSpeed(savedGhostSpeed);
 
+    // Dark Mode System
+    function toggleDarkMode(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-mode-switch')?.setAttribute('checked', 'true');
+    }
+
     // Window Management
     function createWindow(app) {
         const window = document.createElement('div');
         window.className = 'window';
         window.innerHTML = `
-                <div class="window-header">
-                    <span>${app.title}</span>
-                    <div>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
-                    </div>
+            <div class="window-header">
+                <span>${app.title}</span>
+                <div>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
                 </div>
-                ${app.html}
-            `;
+            </div>
+            ${app.html}
+        `;
 
         document.body.appendChild(window);
         makeDraggable(window);
@@ -468,191 +652,28 @@
         }
     }
 
-    // Pac-Man Game
-    class PacManGame {
-        constructor(canvas) {
-            this.canvas = canvas;
-            this.ctx = canvas.getContext('2d');
-            this.width = 600;
-            this.height = 400;
-
-            this.canvas.width = this.width;
-            this.canvas.height = this.height;
-
-            this.gridSize = 20; // Größe der Zellen im Labyrinth
-            this.pacman = { x: 1, y: 1, size: 18, dx: 0, dy: 0 };
-            this.ghosts = [
-                { x: 10, y: 8, size: 18, dx: 1, dy: 0, color: 'red' },
-                { x: 8, y: 10, size: 18, dx: 0, dy: 1, color: 'pink' }
-            ];
-            this.pellets = [];
-            this.score = 0;
-
-            this.maze = [
-                // 0 = Wand, 1 = Pellet, 2 = leerer Raum
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
-                [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
-                [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
-                [0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ];
-
-            this.init();
-        }
-
-        init() {
-            // Keyboard controls
-            document.addEventListener('keydown', (e) => this.handleKeydown(e));
-
-            this.gameLoop();
-        }
-
-        handleKeydown(e) {
-            switch (e.key) {
-                case 'ArrowUp':
-                    this.pacman.dx = 0;
-                    this.pacman.dy = -1;
-                    break;
-                case 'ArrowDown':
-                    this.pacman.dx = 0;
-                    this.pacman.dy = 1;
-                    break;
-                case 'ArrowLeft':
-                    this.pacman.dx = -1;
-                    this.pacman.dy = 0;
-                    break;
-                case 'ArrowRight':
-                    this.pacman.dx = 1;
-                    this.pacman.dy = 0;
-                    break;
-            }
-        }
-
-        gameLoop() {
-            this.update();
-            this.draw();
-            if (!this.checkGameOver()) {
-                requestAnimationFrame(() => this.gameLoop());
-            } else {
-                alert(`Spiel vorbei! Dein Punktestand: ${this.score}`);
-            }
-        }
-
-        update() {
-            // Pac-Man Bewegung
-            const nextX = this.pacman.x + this.pacman.dx;
-            const nextY = this.pacman.y + this.pacman.dy;
-
-            // Überprüfen, ob die nächste Position keine Wand ist
-            if (this.maze[Math.floor(nextY)][Math.floor(nextX)] !== 0) {
-                this.pacman.x = nextX;
-                this.pacman.y = nextY;
-            }
-
-            // Pellets sammeln
-            if (this.maze[Math.floor(this.pacman.y)][Math.floor(this.pacman.x)] === 1) {
-                this.maze[Math.floor(this.pacman.y)][Math.floor(this.pacman.x)] = 2;
-                this.score += 10;
-            }
-
-            // Geister bewegen
-            this.ghosts.forEach(ghost => {
-                const nextGhostX = ghost.x + ghost.dx;
-                const nextGhostY = ghost.y + ghost.dy;
-
-                // Überprüfen, ob der Geist auf eine Wand trifft
-                if (this.maze[Math.floor(nextGhostY)][Math.floor(nextGhostX)] === 0) {
-                    ghost.dx *= -1;
-                    ghost.dy *= -1;
-                } else {
-                    ghost.x = nextGhostX;
-                    ghost.y = nextGhostY;
-                }
-            });
-        }
-
-        draw() {
-            console.log('Zeichne Pac-Man und das Labyrinth');
-            this.ctx.clearRect(0, 0, this.width, this.height);
-
-            // Labyrinth zeichnen
-            for (let y = 0; y < this.maze.length; y++) {
-                for (let x = 0; x < this.maze[y].length; x++) {
-                    if (this.maze[y][x] === 0) {
-                        this.ctx.fillStyle = 'blue'; // Wände in Blau
-                        this.ctx.fillRect(x * this.gridSize, y * this.gridSize, this.gridSize, this.gridSize);
-                    } else if (this.maze[y][x] === 1) {
-                        this.ctx.fillStyle = 'white'; // Pellets in Weiß
-                        this.ctx.beginPath();
-                        this.ctx.arc(
-                            x * this.gridSize + this.gridSize / 2,
-                            y * this.gridSize + this.gridSize / 2,
-                            5,
-                            0,
-                            Math.PI * 2
-                        );
-                        this.ctx.fill();
-                    }
-                }
-            }
-
-            // Pac-Man zeichnen
-            this.ctx.fillStyle = 'yellow'; // Pac-Man in Gelb
-            this.ctx.beginPath();
-            this.ctx.arc(
-                this.pacman.x * this.gridSize + this.gridSize / 2,
-                this.pacman.y * this.gridSize + this.gridSize / 2,
-                this.pacman.size / 2,
-                0.2 * Math.PI,
-                1.8 * Math.PI
-            );
-            this.ctx.lineTo(
-                this.pacman.x * this.gridSize + this.gridSize / 2,
-                this.pacman.y * this.gridSize + this.gridSize / 2
-            );
-            this.ctx.fill();
-
-            // Geister zeichnen
-            this.ghosts.forEach(ghost => {
-                this.ctx.fillStyle = ghost.color; // Geister in ihrer jeweiligen Farbe
-                this.ctx.beginPath();
-                this.ctx.arc(
-                    ghost.x * this.gridSize + this.gridSize / 2,
-                    ghost.y * this.gridSize + this.gridSize / 2,
-                    ghost.size / 2,
-                    0,
-                    Math.PI * 2
-                );
-                this.ctx.fill();
-            });
-
-            // Punktestand anzeigen
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = '16px Arial';
-            this.ctx.fillText(`Punkte: ${this.score}`, 10, this.height - 10);
-        }
-
-        checkGameOver() {
-            return this.ghosts.some(ghost => ghost.x === this.pacman.x && ghost.y === this.pacman.y);
-        }
-    }
-
     // App Starter
     function openApp(appName) {
         const app = apps[appName];
-        if (!app) return;
+        if (!app) {
+            console.error(`App "${appName}" nicht gefunden.`);
+            return;
+        }
 
         const window = createWindow(app); // Erstellt ein Fenster mit dem HTML der App
-        if (appName === 'pacman') {
-            const canvas = window.querySelector('canvas'); // Sucht das Canvas-Element im Fenster
-            console.log(window.querySelector('canvas')); // Sollte das Canvas-Element anzeigen
-            if (canvas) new PacManGame(canvas); // Initialisiert das Pac-Man-Spiel
+        if (!window) {
+            console.error(`Fenster für App "${appName}" konnte nicht erstellt werden.`);
+            return;
+        }
+        
+        // Spezielle Initialisierung je nach App
+        if (appName === 'pong') {
+            const canvas = window.querySelector('canvas');
+            if (canvas) {
+                new PongGame(canvas);
+            } else {
+                console.error('Canvas für Pong-Spiel nicht gefunden');
+            }
         }
     }
 
@@ -663,6 +684,19 @@
     }
     setInterval(updateTime, 1000);
     updateTime();
+
+    function execCommand(command, value = null) {
+        document.execCommand(command, false, value);
+    }
+
+    function saveText() {
+        const content = document.getElementById('editor').innerHTML;
+        const blob = new Blob([content], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'texteditor-content.html';
+        a.click();
+    }
 </script>
 </body>
 </html>
