@@ -556,7 +556,7 @@
         }
 
         .dock-autohide:hover {
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
 
@@ -607,8 +607,13 @@
     function handleAuth(e) {
         e.preventDefault();
         const users = JSON.parse(localStorage.getItem('users') || '{}');
-        const username = document.getElementById('username').value;
+        const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            alert('Bitte Benutzernamen und Passwort eingeben!');
+            return;
+        }
 
         if (isRegistering) {
             if (users[username]) return alert('Benutzer existiert bereits!');
@@ -1475,6 +1480,32 @@
         } else {
             dock.classList.remove('dock-autohide');
         }
+        
+        // Wenn das Dock unten ist, muss der hover-Effekt angepasst werden
+        const dockPosition = localStorage.getItem('dockPosition') || 'bottom';
+        if (dockPosition === 'bottom') {
+            document.styleSheets[0].insertRule(`
+                .dock-autohide:hover {
+                    transform: translateX(-50%) translateY(0) !important;
+                    opacity: 1;
+                }
+            `, document.styleSheets[0].cssRules.length);
+        } else if (dockPosition === 'left') {
+            document.styleSheets[0].insertRule(`
+                .dock-autohide:hover {
+                    transform: translateX(0) translateY(-50%) !important;
+                    opacity: 1;
+                }
+            `, document.styleSheets[0].cssRules.length);
+        } else if (dockPosition === 'right') {
+            document.styleSheets[0].insertRule(`
+                .dock-autohide:hover {
+                    transform: translateX(0) translateY(-50%) !important;
+                    opacity: 1;
+                }
+            `, document.styleSheets[0].cssRules.length);
+        }
+        
         localStorage.setItem('dockAutoHide', enabled);
     }
 
@@ -1654,6 +1685,15 @@
         loginForm.classList.add('login-style-' + style);
         localStorage.setItem('loginStyle', style);
     }
+
+    // Login-Titel ändern
+    function changeLoginTitle(title) {
+        const loginTitle = document.querySelector('#login-container h1');
+        if (loginTitle) {
+            loginTitle.textContent = title;
+            localStorage.setItem('loginTitle', title);
+        }
+    }
     
     // Lade gespeicherte Einstellungen beim Start
     function loadSavedSettings() {
@@ -1710,6 +1750,13 @@
         const savedLoginLogo = localStorage.getItem('loginLogo');
         if (savedLoginLogo) changeLoginLogo(savedLoginLogo);
         
+        // Lade Login-Titel
+        const savedLoginTitle = localStorage.getItem('loginTitle');
+        if (savedLoginTitle) {
+            const loginTitle = document.querySelector('#login-container h1');
+            if (loginTitle) loginTitle.textContent = savedLoginTitle;
+        }
+        
         // Lade Animations-Einstellung
         const animations = localStorage.getItem('animations') !== 'false';
         toggleAnimations(animations);
@@ -1725,7 +1772,5 @@
     // Beim Laden ausführen
     document.addEventListener('DOMContentLoaded', loadSavedSettings);
 </script>
-
-
-</html></body></body>
+</body>
 </html>
