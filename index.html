@@ -200,6 +200,15 @@
                     
                     <h3>Primärfarbe</h3>
                     <input type="color" id="primary-color-picker" value="#0066ff" onchange="changePrimaryColor(this.value)">
+                    
+                    <h3>Hintergrundfarbe</h3>
+                    <input type="color" id="background-color-picker" value="#ffffff" onchange="changeBackgroundColor(this.value)">
+                    
+                    <h3>Pac-Man Geschwindigkeit</h3>
+                    <input type="range" id="pacman-speed" min="1" max="5" value="2" onchange="changePacmanSpeed(this.value)">
+                    
+                    <h3>Geister Geschwindigkeit</h3>
+                    <input type="range" id="ghost-speed" min="1" max="5" value="2" onchange="changeGhostSpeed(this.value)">
                 </div>
             `
         },
@@ -276,6 +285,34 @@
     const savedWallpaper = localStorage.getItem('wallpaper');
     if (savedWallpaper) changeWallpaper(savedWallpaper);
 
+    // Background Color System
+    function changeBackgroundColor(color) {
+        document.body.style.backgroundColor = color;
+        localStorage.setItem('backgroundColor', color);
+    }
+
+    // Pac-Man Speed System
+    let pacmanSpeed = 2;
+    function changePacmanSpeed(speed) {
+        pacmanSpeed = parseInt(speed);
+        localStorage.setItem('pacmanSpeed', speed);
+    }
+
+    // Load saved Pac-Man speed
+    const savedPacmanSpeed = localStorage.getItem('pacmanSpeed');
+    if (savedPacmanSpeed) changePacmanSpeed(savedPacmanSpeed);
+
+    // Ghost Speed System
+    let ghostSpeed = 2;
+    function changeGhostSpeed(speed) {
+        ghostSpeed = parseInt(speed);
+        localStorage.setItem('ghostSpeed', speed);
+    }
+
+    // Load saved ghost speed
+    const savedGhostSpeed = localStorage.getItem('ghostSpeed');
+    if (savedGhostSpeed) changeGhostSpeed(savedGhostSpeed);
+
     // Window Management
     function createWindow(app) {
         const window = document.createElement('div');
@@ -338,6 +375,9 @@
             this.width = 600;
             this.height = 400;
 
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+
             this.paddleHeight = 60;
             this.paddleWidth = 10;
             this.ballSize = 8;
@@ -358,9 +398,6 @@
         }
 
         init() {
-            this.canvas.width = this.width;
-            this.canvas.height = this.height;
-
             this.canvas.addEventListener('mousemove', e => {
                 const rect = this.canvas.getBoundingClientRect();
                 this.playerY = e.clientY - rect.top - this.paddleHeight/2;
@@ -439,6 +476,9 @@
             this.width = 600;
             this.height = 400;
 
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+
             this.gridSize = 20; // Größe der Zellen im Labyrinth
             this.pacman = { x: 1, y: 1, size: 18, dx: 0, dy: 0 };
             this.ghosts = [
@@ -467,9 +507,6 @@
         }
 
         init() {
-            this.canvas.width = this.width;
-            this.canvas.height = this.height;
-
             // Keyboard controls
             document.addEventListener('keydown', (e) => this.handleKeydown(e));
 
@@ -512,14 +549,15 @@
             const nextX = this.pacman.x + this.pacman.dx;
             const nextY = this.pacman.y + this.pacman.dy;
 
-            if (this.maze[nextY][nextX] !== 0) {
+            // Überprüfen, ob die nächste Position keine Wand ist
+            if (this.maze[Math.floor(nextY)][Math.floor(nextX)] !== 0) {
                 this.pacman.x = nextX;
                 this.pacman.y = nextY;
             }
 
             // Pellets sammeln
-            if (this.maze[this.pacman.y][this.pacman.x] === 1) {
-                this.maze[this.pacman.y][this.pacman.x] = 2;
+            if (this.maze[Math.floor(this.pacman.y)][Math.floor(this.pacman.x)] === 1) {
+                this.maze[Math.floor(this.pacman.y)][Math.floor(this.pacman.x)] = 2;
                 this.score += 10;
             }
 
@@ -528,7 +566,8 @@
                 const nextGhostX = ghost.x + ghost.dx;
                 const nextGhostY = ghost.y + ghost.dy;
 
-                if (this.maze[nextGhostY][nextGhostX] === 0) {
+                // Überprüfen, ob der Geist auf eine Wand trifft
+                if (this.maze[Math.floor(nextGhostY)][Math.floor(nextGhostX)] === 0) {
                     ghost.dx *= -1;
                     ghost.dy *= -1;
                 } else {
@@ -539,8 +578,10 @@
         }
 
         draw() {
-            // Labyrinth zeichnen
+            console.log('Zeichne Pac-Man und das Labyrinth');
             this.ctx.clearRect(0, 0, this.width, this.height);
+
+            // Labyrinth zeichnen
             for (let y = 0; y < this.maze.length; y++) {
                 for (let x = 0; x < this.maze[y].length; x++) {
                     if (this.maze[y][x] === 0) {
@@ -607,9 +648,12 @@
         const app = apps[appName];
         if (!app) return;
 
-        const window = createWindow(app);
-        if (appName === 'pong') new PongGame(window.querySelector('canvas'));
-        if (appName === 'pacman') new PacManGame(window.querySelector('canvas'));
+        const window = createWindow(app); // Erstellt ein Fenster mit dem HTML der App
+        if (appName === 'pacman') {
+            const canvas = window.querySelector('canvas'); // Sucht das Canvas-Element im Fenster
+            console.log(window.querySelector('canvas')); // Sollte das Canvas-Element anzeigen
+            if (canvas) new PacManGame(canvas); // Initialisiert das Pac-Man-Spiel
+        }
     }
 
     // Systemzeit
