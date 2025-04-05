@@ -137,6 +137,7 @@
         <img src="settings.png" class="app-icon" onclick="openApp('settings')">
         <img src="calc.png" class="app-icon" onclick="openApp('calculator')">
         <img src="pong.png" class="app-icon" onclick="openApp('pong')">
+        <img src="pacman.png" class="app-icon" onclick="openApp('pacman')">
     </div>
 </div>
 
@@ -177,18 +178,30 @@
         settings: {
             title: 'Einstellungen',
             html: `
-                    <div class="window-content">
-                        <h3>Hintergrund</h3>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                            <img src="background.png" style="width:100px;cursor:pointer;"
-                                 onclick="changeWallpaper('background.png')">
-                            <div style="background:#666;width:100px;height:60px;cursor:pointer;"
-                                 onclick="changeWallpaper('#666')"></div>
-                            <div style="background:linear-gradient(45deg, #ff6b6b, #4ecdc4);width:100px;height:60px;cursor:pointer;"
-                                 onclick="changeWallpaper('linear-gradient(45deg, #ff6b6b, #4ecdc4)')"></div>
-                        </div>
+                <div class="window-content">
+                    <h3>Hintergrund</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <img src="background.png" style="width:100px;cursor:pointer;"
+                             onclick="changeWallpaper('background.png')">
+                        <div style="background:#666;width:100px;height:60px;cursor:pointer;"
+                             onclick="changeWallpaper('#666')"></div>
+                        <div style="background:linear-gradient(45deg, #ff6b6b, #4ecdc4);width:100px;height:60px;cursor:pointer;"
+                             onclick="changeWallpaper('linear-gradient(45deg, #ff6b6b, #4ecdc4)')"></div>
                     </div>
-                `
+                    <button onclick="resetWallpaper()" style="margin-top: 10px;">Hintergrund zurücksetzen</button>
+                    
+                    <h3>Schriftgröße</h3>
+                    <select id="font-size-selector" onchange="changeFontSize(this.value)">
+                        <option value="16px">Standard</option>
+                        <option value="14px">Klein</option>
+                        <option value="18px">Groß</option>
+                        <option value="20px">Sehr groß</option>
+                    </select>
+                    
+                    <h3>Primärfarbe</h3>
+                    <input type="color" id="primary-color-picker" value="#0066ff" onchange="changePrimaryColor(this.value)">
+                </div>
+            `
         },
         calculator: {
             title: 'Rechner',
@@ -221,6 +234,10 @@
         pong: {
             title: 'Pong',
             html: `<canvas class="game-canvas" id="pong-canvas"></canvas>`
+        },
+        pacman: {
+            title: 'Pac-Man',
+            html: `<canvas class="game-canvas" id="pacman-canvas"></canvas>`
         }
     };
 
@@ -229,6 +246,31 @@
         document.body.style.background = source;
         localStorage.setItem('wallpaper', source);
     }
+
+    function resetWallpaper() {
+        const defaultWallpaper = 'background.png';
+        changeWallpaper(defaultWallpaper);
+    }
+
+    // Font Size System
+    function changeFontSize(size) {
+        document.documentElement.style.fontSize = size;
+        localStorage.setItem('fontSize', size);
+    }
+
+    // Load saved font size
+    const savedFontSize = localStorage.getItem('fontSize');
+    if (savedFontSize) changeFontSize(savedFontSize);
+
+    // Primary Color System
+    function changePrimaryColor(color) {
+        document.documentElement.style.setProperty('--primary-color', color);
+        localStorage.setItem('primaryColor', color);
+    }
+
+    // Load saved primary color
+    const savedPrimaryColor = localStorage.getItem('primaryColor');
+    if (savedPrimaryColor) changePrimaryColor(savedPrimaryColor);
 
     // Load saved wallpaper
     const savedWallpaper = localStorage.getItem('wallpaper');
@@ -389,6 +431,177 @@
         }
     }
 
+    // Pac-Man Game
+    class PacManGame {
+        constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.width = 600;
+            this.height = 400;
+
+            this.gridSize = 20; // Größe der Zellen im Labyrinth
+            this.pacman = { x: 1, y: 1, size: 18, dx: 0, dy: 0 };
+            this.ghosts = [
+                { x: 10, y: 8, size: 18, dx: 1, dy: 0, color: 'red' },
+                { x: 8, y: 10, size: 18, dx: 0, dy: 1, color: 'pink' }
+            ];
+            this.pellets = [];
+            this.score = 0;
+
+            this.maze = [
+                // 0 = Wand, 1 = Pellet, 2 = leerer Raum
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+                [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0],
+                [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+                [0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ];
+
+            this.init();
+        }
+
+        init() {
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => this.handleKeydown(e));
+
+            this.gameLoop();
+        }
+
+        handleKeydown(e) {
+            switch (e.key) {
+                case 'ArrowUp':
+                    this.pacman.dx = 0;
+                    this.pacman.dy = -1;
+                    break;
+                case 'ArrowDown':
+                    this.pacman.dx = 0;
+                    this.pacman.dy = 1;
+                    break;
+                case 'ArrowLeft':
+                    this.pacman.dx = -1;
+                    this.pacman.dy = 0;
+                    break;
+                case 'ArrowRight':
+                    this.pacman.dx = 1;
+                    this.pacman.dy = 0;
+                    break;
+            }
+        }
+
+        gameLoop() {
+            this.update();
+            this.draw();
+            if (!this.checkGameOver()) {
+                requestAnimationFrame(() => this.gameLoop());
+            } else {
+                alert(`Spiel vorbei! Dein Punktestand: ${this.score}`);
+            }
+        }
+
+        update() {
+            // Pac-Man Bewegung
+            const nextX = this.pacman.x + this.pacman.dx;
+            const nextY = this.pacman.y + this.pacman.dy;
+
+            if (this.maze[nextY][nextX] !== 0) {
+                this.pacman.x = nextX;
+                this.pacman.y = nextY;
+            }
+
+            // Pellets sammeln
+            if (this.maze[this.pacman.y][this.pacman.x] === 1) {
+                this.maze[this.pacman.y][this.pacman.x] = 2;
+                this.score += 10;
+            }
+
+            // Geister bewegen
+            this.ghosts.forEach(ghost => {
+                const nextGhostX = ghost.x + ghost.dx;
+                const nextGhostY = ghost.y + ghost.dy;
+
+                if (this.maze[nextGhostY][nextGhostX] === 0) {
+                    ghost.dx *= -1;
+                    ghost.dy *= -1;
+                } else {
+                    ghost.x = nextGhostX;
+                    ghost.y = nextGhostY;
+                }
+            });
+        }
+
+        draw() {
+            // Labyrinth zeichnen
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            for (let y = 0; y < this.maze.length; y++) {
+                for (let x = 0; x < this.maze[y].length; x++) {
+                    if (this.maze[y][x] === 0) {
+                        this.ctx.fillStyle = 'blue'; // Wände in Blau
+                        this.ctx.fillRect(x * this.gridSize, y * this.gridSize, this.gridSize, this.gridSize);
+                    } else if (this.maze[y][x] === 1) {
+                        this.ctx.fillStyle = 'white'; // Pellets in Weiß
+                        this.ctx.beginPath();
+                        this.ctx.arc(
+                            x * this.gridSize + this.gridSize / 2,
+                            y * this.gridSize + this.gridSize / 2,
+                            5,
+                            0,
+                            Math.PI * 2
+                        );
+                        this.ctx.fill();
+                    }
+                }
+            }
+
+            // Pac-Man zeichnen
+            this.ctx.fillStyle = 'yellow'; // Pac-Man in Gelb
+            this.ctx.beginPath();
+            this.ctx.arc(
+                this.pacman.x * this.gridSize + this.gridSize / 2,
+                this.pacman.y * this.gridSize + this.gridSize / 2,
+                this.pacman.size / 2,
+                0.2 * Math.PI,
+                1.8 * Math.PI
+            );
+            this.ctx.lineTo(
+                this.pacman.x * this.gridSize + this.gridSize / 2,
+                this.pacman.y * this.gridSize + this.gridSize / 2
+            );
+            this.ctx.fill();
+
+            // Geister zeichnen
+            this.ghosts.forEach(ghost => {
+                this.ctx.fillStyle = ghost.color; // Geister in ihrer jeweiligen Farbe
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    ghost.x * this.gridSize + this.gridSize / 2,
+                    ghost.y * this.gridSize + this.gridSize / 2,
+                    ghost.size / 2,
+                    0,
+                    Math.PI * 2
+                );
+                this.ctx.fill();
+            });
+
+            // Punktestand anzeigen
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = '16px Arial';
+            this.ctx.fillText(`Punkte: ${this.score}`, 10, this.height - 10);
+        }
+
+        checkGameOver() {
+            return this.ghosts.some(ghost => ghost.x === this.pacman.x && ghost.y === this.pacman.y);
+        }
+    }
+
     // App Starter
     function openApp(appName) {
         const app = apps[appName];
@@ -396,6 +609,7 @@
 
         const window = createWindow(app);
         if (appName === 'pong') new PongGame(window.querySelector('canvas'));
+        if (appName === 'pacman') new PacManGame(window.querySelector('canvas'));
     }
 
     // Systemzeit
