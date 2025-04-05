@@ -159,13 +159,16 @@
         /* Fenster */
         .window {
             position: absolute;
-            min-width: 340px;
+            min-width: 300px;
+            min-height: 200px;
+            width: 500px;
+            height: 400px;
             border-radius: var(--border-radius);
             background: var(--window-bg);
             box-shadow: 0 12px 40px var(--shadow-color);
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             transform: scale(0.98);
             opacity: 0.95;
         }
@@ -173,6 +176,10 @@
         .window:hover {
             transform: scale(1);
             opacity: 1;
+        }
+
+        .window.maximized {
+            border-radius: 0;
         }
 
         .window-header {
@@ -186,12 +193,17 @@
             backdrop-filter: blur(8px);
         }
 
-        .window-header button {
+        .window-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .window-minimize,
+        .window-maximize {
             width: 24px;
             height: 24px;
             border-radius: 50%;
             border: none;
-            background: #ff5f57;
             color: rgba(0, 0, 0, 0.5);
             font-weight: bold;
             cursor: pointer;
@@ -200,13 +212,44 @@
             justify-content: center;
         }
 
-        .window-header button:hover {
+        .window-minimize {
+            background: #ffbd2e;
+        }
+
+        .window-maximize {
+            background: #28c940;
+        }
+
+        .window-close {
+            background: #ff5f57;
+        }
+
+        .window-minimize:hover {
+            background: #f0ad1d;
+        }
+
+        .window-maximize:hover {
+            background: #1db934;
+        }
+
+        .window-close:hover {
             background: #ff3b30;
         }
 
         .window-content {
-            padding: 20px;
             height: calc(100% - 52px);
+            overflow: auto;
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, var(--primary-color) 50%);
+            border-radius: 0 0 var(--border-radius) 0;
         }
 
         /* Taschenrechner */
@@ -244,8 +287,9 @@
 
         /* Spiele */
         .game-canvas {
-            width: 640px;
-            height: 420px;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             border-radius: 12px;
             box-shadow: 0 4px 12px var(--shadow-color);
         }
@@ -295,6 +339,230 @@
             background: #2c2c2e;
             color: #fff;
             border-color: #444;
+        }
+
+        /* Erweiterte Einstellungen */
+        .settings-panel {
+            display: flex;
+            height: 450px;
+            overflow: hidden;
+        }
+        
+        .settings-sidebar {
+            width: 180px;
+            background: rgba(0, 0, 0, 0.05);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+        
+        body.dark-mode .settings-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-nav-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .settings-nav-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .settings-nav-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 0 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .settings-section.active {
+            display: block;
+        }
+        
+        .setting-group {
+            margin-bottom: 15px;
+        }
+        
+        .setting-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .setting-group select,
+        .setting-group input[type="text"],
+        .setting-group input[type="color"],
+        .setting-group input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        body.dark-mode .setting-group select,
+        body.dark-mode .setting-group input[type="text"],
+        body.dark-mode .setting-group input[type="color"],
+        body.dark-mode .setting-group input[type="range"] {
+            background: #333;
+            color: #fff;
+            border-color: #555;
+        }
+        
+        .setting-group button {
+            padding: 8px 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .setting-group button:hover {
+            background: var(--accent-color);
+        }
+        
+        .danger-button {
+            background: #ff3b30 !important;
+        }
+        
+        .danger-button:hover {
+            background: #d92e28 !important;
+        }
+        
+        .setting-input-group {
+            display: flex;
+        }
+        
+        .setting-input-group input {
+            flex: 1;
+            border-radius: 6px 0 0 6px !important;
+        }
+        
+        .setting-input-group button {
+            border-radius: 0 6px 6px 0;
+        }
+        
+        /* Switch Toggle */
+        .setting-switch {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .setting-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch-slider {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+            transition: .4s;
+        }
+        
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
+        
+        .setting-switch input:checked + .switch-slider {
+            background-color: var(--primary-color);
+        }
+        
+        .setting-switch input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Zusätzliche Stile für Desktop-Icons und Login-Stil */
+        .desktop-icons-container {
+            position: fixed;
+            top: 50px;
+            left: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 80px);
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .desktop-icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .desktop-icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 5px;
+        }
+
+        .desktop-icon span {
+            display: block;
+            color: white;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Login Styles */
+        .login-style-glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .login-style-solid {
+            background: #333;
+            border: none;
+        }
+
+        .login-style-minimal {
+            background: transparent;
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dock Auto-Hide */
+        .dock-autohide {
+            transform: translateY(100px);
+            opacity: 0.2;
+            transition: transform 0.4s ease, opacity 0.3s ease;
+        }
+
+        .dock-autohide:hover {
+            transform: translateX(-50%);
+            opacity: 1;
+        }
+
+        body.no-animations * {
+            transition: none !important;
+            animation: none !important;
         }
     </style>
 </head>
@@ -364,12 +632,263 @@
         settings: {
             title: 'Einstellungen',
             html: `
-                <div class="window-content">
-                    <h3>Design</h3>
-                    <label>
-                        <input type="checkbox" id="dark-mode-switch" onchange="toggleDarkMode(this.checked)">
-                        Dark Mode
-                    </label>
+                <div class="settings-panel">
+                    <div class="settings-sidebar">
+                        <div class="settings-nav-item active" data-target="appearance">Aussehen</div>
+                        <div class="settings-nav-item" data-target="desktop">Desktop</div>
+                        <div class="settings-nav-item" data-target="loginscreen">Login-Screen</div>
+                        <div class="settings-nav-item" data-target="system">System</div>
+                        <div class="settings-nav-item" data-target="about">Info</div>
+                    </div>
+                    
+                    <div class="settings-content">
+                        <!-- Aussehen -->
+                        <div class="settings-section active" id="appearance">
+                            <h3>Design</h3>
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" id="dark-mode-switch" onchange="toggleDarkMode(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Dark Mode</span>
+                                </label>
+                            </div>
+                            
+                            <h3>Hintergrund</h3>
+                            <div class="wallpaper-grid">
+                                <div class="wallpaper-item" onclick="changeWallpaper('background.png')">
+                                    <img src="background.png" alt="Standard">
+                                </div>
+                                <div class="wallpaper-item" onclick="changeWallpaper('url(\'https://source.unsplash.com/1920x1080/?nature\')')">
+                                    <img src="https://source.unsplash.com/300x200/?nature" alt="Natur">
+                                </div>
+                                <div class="wallpaper-item" onclick="changeWallpaper('url(\'https://source.unsplash.com/1920x1080/?abstract\')')">
+                                    <img src="https://source.unsplash.com/300x200/?abstract" alt="Abstrakt">
+                                </div>
+                                <div class="wallpaper-item" onclick="changeWallpaper('url(\'https://source.unsplash.com/1920x1080/?city\')')">
+                                    <img src="https://source.unsplash.com/300x200/?city" alt="Stadt">
+                                </div>
+                                <div class="wallpaper-item" onclick="changeWallpaper('url(\'https://source.unsplash.com/1920x1080/?space\')')">
+                                    <img src="https://source.unsplash.com/300x200/?space" alt="Weltraum">
+                                </div>
+                                <div class="wallpaper-item" onclick="changeWallpaper('url(\'https://source.unsplash.com/1920x1080/?minimal\')')">
+                                    <img src="https://source.unsplash.com/300x200/?minimal" alt="Minimal">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Eigenes Hintergrundbild URL:</label>
+                                <div class="setting-input-group">
+                                    <input type="text" id="custom-wallpaper" placeholder="https://example.com/image.jpg">
+                                    <button onclick="changeWallpaper('url(\'' + document.getElementById('custom-wallpaper').value + '\')')">Anwenden</button>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Eigene Hintergrundfarbe:</label>
+                                <input type="color" onchange="changeWallpaper(this.value)" value="#666666">
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Hintergrund-Deckkraft:</label>
+                                <input type="range" min="0" max="100" value="100" onchange="setBackgroundOpacity(this.value)">
+                            </div>
+                            
+                            <h3>Farben</h3>
+                            <div class="setting-group">
+                                <label>Primärfarbe:</label>
+                                <input type="color" id="primary-color-picker" value="#0066ff" onchange="changePrimaryColor(this.value)">
+                            </div>
+                            <div class="setting-group">
+                                <label>Akzentfarbe:</label>
+                                <input type="color" id="accent-color-picker" value="#00c2ff" onchange="changeAccentColor(this.value)">
+                            </div>
+                            
+                            <h3>Text</h3>
+                            <div class="setting-group">
+                                <label>Schriftgröße:</label>
+                                <select id="font-size-selector" onchange="changeFontSize(this.value)">
+                                    <option value="14px">Klein</option>
+                                    <option value="16px" selected>Standard</option>
+                                    <option value="18px">Groß</option>
+                                    <option value="20px">Sehr groß</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label>Schriftart:</label>
+                                <select id="font-family-selector" onchange="changeFontFamily(this.value)">
+                                    <option value="'Segoe UI', sans-serif" selected>Segoe UI</option>
+                                    <option value="'Arial', sans-serif">Arial</option>
+                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                    <option value="'SF Pro Display', sans-serif">SF Pro</option>
+                                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Desktop -->
+                        <div class="settings-section" id="desktop">
+                            <h3>Dock-Einstellungen</h3>
+                            <div class="setting-group">
+                                <label>Dock-Position:</label>
+                                <select onchange="changeDockPosition(this.value)">
+                                    <option value="bottom" selected>Unten</option>
+                                    <option value="left">Links</option>
+                                    <option value="right">Rechts</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label>Dock-Größe:</label>
+                                <input type="range" min="40" max="80" value="56" onchange="changeDockSize(this.value)">
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" onchange="toggleDockAutoHide(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Dock automatisch ausblenden</span>
+                                </label>
+                            </div>
+                            
+                            <h3>Desktop-Icons</h3>
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" onchange="toggleDesktopIcons(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Desktop-Icons anzeigen</span>
+                                </label>
+                            </div>
+                            
+                            <h3>Effekte & Animation</h3>
+                            <div class="setting-group">
+                                <label>Fenster-Transparenz:</label>
+                                <input type="range" min="0" max="100" value="95" onchange="changeWindowOpacity(this.value)">
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" checked onchange="toggleAnimations(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Animationen aktivieren</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Login-Screen -->
+                        <div class="settings-section" id="loginscreen">
+                            <h3>Login-Anpassung</h3>
+                            <div class="setting-group">
+                                <label>Login-Hintergrundbild:</label>
+                                <select onchange="changeLoginBackground(this.value)">
+                                    <option value="default" selected>Standard (wie Desktop)</option>
+                                    <option value="blur">Desktop mit Unschärfe</option>
+                                    <option value="dark">Dunkel</option>
+                                    <option value="light">Hell</option>
+                                    <option value="custom">Benutzerdefiniert</option>
+                                </select>
+                            </div>
+                            <div class="setting-group" id="custom-login-bg" style="display: none;">
+                                <label>Eigene Login-Hintergrund URL:</label>
+                                <div class="setting-input-group">
+                                    <input type="text" id="custom-login-wallpaper" placeholder="https://example.com/image.jpg">
+                                    <button onclick="setCustomLoginBackground(document.getElementById('custom-login-wallpaper').value)">Anwenden</button>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Login-Logo:</label>
+                                <select onchange="changeLoginLogo(this.value)">
+                                    <option value="text" selected>Text (WebOS)</option>
+                                    <option value="icon">Symbol</option>
+                                    <option value="none">Kein Logo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Login-Box-Stil:</label>
+                                <select onchange="changeLoginStyle(this.value)">
+                                    <option value="glass" selected>Glaseffekt</option>
+                                    <option value="solid">Einfarbig</option>
+                                    <option value="minimal">Minimalistisch</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group">
+                                <label>Login-Text:</label>
+                                <input type="text" id="login-title" value="WebOS Login" onchange="changeLoginTitle(this.value)">
+                            </div>
+                        </div>
+                        
+                        <!-- System -->
+                        <div class="settings-section" id="system">
+                            <h3>Systemeinstellungen</h3>
+                            <div class="setting-group">
+                                <label>Sprache:</label>
+                                <select onchange="changeLanguage(this.value)">
+                                    <option value="de" selected>Deutsch</option>
+                                    <option value="en">Englisch</option>
+                                    <option value="fr">Französisch</option>
+                                    <option value="es">Spanisch</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Zeitformat:</label>
+                                <select onchange="changeTimeFormat(this.value)">
+                                    <option value="24h" selected>24 Stunden</option>
+                                    <option value="12h">12 Stunden (AM/PM)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" checked onchange="toggleSounds(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Systemklänge</span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label class="setting-switch">
+                                    <input type="checkbox" onchange="toggleNotifications(this.checked)">
+                                    <span class="switch-slider"></span>
+                                    <span>Benachrichtigungen</span>
+                                </label>
+                            </div>
+                            
+                            <h3>Datensicherung</h3>
+                            <div class="setting-group">
+                                <button onclick="exportSettings()">Einstellungen exportieren</button>
+                                <button onclick="document.getElementById('import-settings').click()">Einstellungen importieren</button>
+                                <input type="file" id="import-settings" style="display:none" onchange="importSettings(this)">
+                            </div>
+                            
+                            <h3>Zurücksetzen</h3>
+                            <div class="setting-group">
+                                <button class="danger-button" onclick="if(confirm('Alle Einstellungen zurücksetzen?')) resetAllSettings()">Auf Standardeinstellungen zurücksetzen</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Info -->
+                        <div class="settings-section" id="about">
+                            <h3>WebDesktop OS</h3>
+                            <p>Version: 1.0.0</p>
+                            <p>Ein modernes Web-basiertes Betriebssystem</p>
+                            <p>© 2025 WebDesktop Team</p>
+                            
+                            <h3>System-Information</h3>
+                            <div id="system-info">
+                                <p><strong>Browser:</strong> <span id="browser-info"></span></p>
+                                <p><strong>Betriebssystem:</strong> <span id="os-info"></span></p>
+                                <p><strong>Auflösung:</strong> <span id="screen-info"></span></p>
+                                <p><strong>Sprache:</strong> <span id="lang-info"></span></p>
+                            </div>
+                            
+                            <script>
+                                document.getElementById('browser-info').textContent = navigator.userAgent.match(/(?:firefox|chrome|safari|opera|edge|msie|trident(?=\/))\/?\s*(\d+)/i)[1];
+                                document.getElementById('os-info').textContent = navigator.platform;
+                                document.getElementById('screen-info').textContent = window.innerWidth + ' × ' + window.innerHeight;
+                                document.getElementById('lang-info').textContent = navigator.language;
+                            </script>
+                        </div>
+                    </div>
                 </div>
             `
         },
@@ -504,17 +1023,120 @@
         window.innerHTML = `
             <div class="window-header">
                 <span>${app.title}</span>
-                <div>
-                    <button onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                <div class="window-controls">
+                    <button class="window-minimize" onclick="minimizeWindow(this.parentElement.parentElement.parentElement)">-</button>
+                    <button class="window-maximize" onclick="maximizeWindow(this.parentElement.parentElement.parentElement)">□</button>
+                    <button class="window-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
                 </div>
             </div>
-            ${app.html}
+            <div class="window-content">
+                ${app.html}
+            </div>
+            <div class="resize-handle"></div>
         `;
 
         document.body.appendChild(window);
         makeDraggable(window);
+        makeResizable(window);
         window.style.zIndex = zIndex++;
+        
+        // Setze Standardposition, wenn nicht definiert
+        if (!window.style.left) window.style.left = '100px';
+        if (!window.style.top) window.style.top = '100px';
+        
         return window;
+    }
+
+    function makeResizable(element) {
+        const resizer = element.querySelector('.resize-handle');
+        resizer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
+            const startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
+            
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+            
+            function resize(e) {
+                element.style.width = (startWidth + e.clientX - startX) + 'px';
+                element.style.height = (startHeight + e.clientY - startY) + 'px';
+                
+                // Aktualisiere Canvas-Größe für Spiele, falls vorhanden
+                const canvas = element.querySelector('canvas');
+                if (canvas) {
+                    const contentWidth = element.clientWidth - 40; // Padding berücksichtigen
+                    const contentHeight = element.clientHeight - 92; // Header + Padding
+                    canvas.width = contentWidth;
+                    canvas.height = contentHeight;
+
+                    // Falls Pong-Spiel, aktualisiere Spielfeld
+                    if (element.pongInstance) {
+                        element.pongInstance.resize(contentWidth, contentHeight);
+                    }
+                }
+            }
+            
+            function stopResize() {
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+        });
+    }
+
+    // Fenster maximieren
+    function maximizeWindow(window) {
+        if (window.classList.contains('maximized')) {
+            // Rücksetzen auf gespeicherte Größe und Position
+            window.style.width = window.dataset.prevWidth || '400px';
+            window.style.height = window.dataset.prevHeight || '300px';
+            window.style.top = window.dataset.prevTop || '100px';
+            window.style.left = window.dataset.prevLeft || '100px';
+            window.classList.remove('maximized');
+        } else {
+            // Aktuelle Größe und Position speichern
+            window.dataset.prevWidth = window.style.width;
+            window.dataset.prevHeight = window.style.height;
+            window.dataset.prevTop = window.style.top;
+            window.dataset.prevLeft = window.style.left;
+            
+            // Auf Vollbild setzen
+            window.style.width = 'calc(100% - 40px)';
+            window.style.height = 'calc(100% - 40px)';
+            window.style.top = '20px';
+            window.style.left = '20px';
+            window.classList.add('maximized');
+        }
+        
+        // Canvas-Größe aktualisieren, falls vorhanden
+        const canvas = window.querySelector('canvas');
+        if (canvas) {
+            const contentWidth = window.querySelector('.window-content').clientWidth;
+            const contentHeight = window.querySelector('.window-content').clientHeight;
+            canvas.width = contentWidth;
+            canvas.height = contentHeight;
+            
+            // Falls Pong-Spiel, aktualisiere Spielfeld
+            if (window.pongInstance) {
+                window.pongInstance.resize(contentWidth, contentHeight);
+            }
+        }
+    }
+
+    // Fenster minimieren
+    function minimizeWindow(window) {
+        if (window.classList.contains('minimized')) {
+            window.style.height = window.dataset.prevHeight;
+            window.querySelector('.window-content').style.display = 'block';
+            window.classList.remove('minimized');
+        } else {
+            window.dataset.prevHeight = window.style.height;
+            window.style.height = 'auto';
+            window.querySelector('.window-content').style.display = 'none';
+            window.classList.add('minimized');
+        }
     }
 
     function makeDraggable(element) {
@@ -556,15 +1178,12 @@
         constructor(canvas) {
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d');
-            this.width = 600;
-            this.height = 400;
+            this.width = canvas.width;
+            this.height = canvas.height;
 
-            this.canvas.width = this.width;
-            this.canvas.height = this.height;
-
-            this.paddleHeight = 60;
-            this.paddleWidth = 10;
-            this.ballSize = 8;
+            this.paddleHeight = this.height * 0.15; // Relative Größe
+            this.paddleWidth = this.width * 0.02;
+            this.ballSize = Math.min(this.width, this.height) * 0.02;
 
             this.reset();
             this.init();
@@ -574,8 +1193,8 @@
             this.playerScore = 0;
             this.computerScore = 0;
             this.ball = {
-                x: this.width/2,
-                y: this.height/2,
+                x: this.width / 2,
+                y: this.height / 2,
                 dx: 5,
                 dy: 5
             };
@@ -584,7 +1203,7 @@
         init() {
             this.canvas.addEventListener('mousemove', e => {
                 const rect = this.canvas.getBoundingClientRect();
-                this.playerY = e.clientY - rect.top - this.paddleHeight/2;
+                this.playerY = e.clientY - rect.top - this.paddleHeight / 2;
             });
 
             this.gameLoop();
@@ -601,7 +1220,7 @@
             this.ball.y += this.ball.dy;
 
             // Computer AI
-            this.computerY = this.ball.y - this.paddleHeight/2;
+            this.computerY = this.ball.y - this.paddleHeight / 2;
 
             // Collisions
             if (this.ball.y <= 0 || this.ball.y >= this.height) this.ball.dy *= -1;
@@ -644,11 +1263,21 @@
 
         resetBall() {
             this.ball = {
-                x: this.width/2,
-                y: this.height/2,
+                x: this.width / 2,
+                y: this.height / 2,
                 dx: 5 * (Math.random() > 0.5 ? 1 : -1),
                 dy: 5
             };
+        }
+
+        resize(width, height) {
+            this.width = width;
+            this.height = height;
+            this.paddleHeight = height * 0.15;
+            this.paddleWidth = width * 0.02;
+            this.ballSize = Math.min(width, height) * 0.02;
+            this.ball.x = this.ball.x * width / this.width;
+            this.ball.y = this.ball.y * height / this.height;
         }
     }
 
@@ -670,18 +1299,60 @@
         if (appName === 'pong') {
             const canvas = window.querySelector('canvas');
             if (canvas) {
-                new PongGame(canvas);
+                const pongGame = new PongGame(canvas);
+                window.pongInstance = pongGame;  // Speichere Spielinstanz im Fenster
             } else {
                 console.error('Canvas für Pong-Spiel nicht gefunden');
             }
+        } else if (appName === 'textEditor') {
+            const editor = window.querySelector('#editor');
+            if (editor) {
+                editor.addEventListener('input', () => {
+                    window.dataset.hasChanges = 'true';
+                });
+            }
+        } else if (appName === 'calculator') {
+            // Größe für Taschenrechner anpassen
+            window.style.width = '350px';
+            window.style.height = '450px';
+        }
+
+        if (localStorage.getItem('playAppSound') !== 'false') {
+            playSound('open-app.mp3');
+        }
+    }
+
+    function playSound(soundFile) {
+        if (localStorage.getItem('sounds') !== 'false') {
+            const audio = new Audio(soundFile);
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
         }
     }
 
     // Systemzeit
     function updateTime() {
-        document.getElementById('system-time').textContent =
-            new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+        updateTimeDisplay();
     }
+
+    function updateTimeDisplay() {
+        const timeFormat = localStorage.getItem('timeFormat') || '24h';
+        const options = {
+            hour: '2-digit', 
+            minute: '2-digit'
+        };
+        
+        if (timeFormat === '12h') {
+            options.hour12 = true;
+        } else {
+            options.hour12 = false;
+        }
+        
+        const currentLang = localStorage.getItem('language') || 'de';
+        document.getElementById('system-time').textContent = 
+            new Date().toLocaleTimeString(`${currentLang}-${currentLang.toUpperCase()}`, options);
+    }
+
     setInterval(updateTime, 1000);
     updateTime();
 
@@ -697,6 +1368,364 @@
         a.download = 'texteditor-content.html';
         a.click();
     }
+
+    // Einstellungen Tab Navigation
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('settings-nav-item')) {
+            const target = e.target.dataset.target;
+            
+            // Aktive Klasse in der Sidebar umschalten
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            // Aktiven Inhalt umschalten
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(target).classList.add('active');
+        }
+    });
+
+    // Login-Hintergrund Einstellungen
+    function changeLoginBackground(value) {
+        const customBgDiv = document.getElementById('custom-login-bg');
+        if (customBgDiv) {
+            if (value === 'custom') {
+                customBgDiv.style.display = 'block';
+            } else {
+                customBgDiv.style.display = 'none';
+                localStorage.setItem('loginBackground', value);
+                
+                // Vorschau-Aktualisierung
+                const loginContainer = document.getElementById('login-container');
+                if (loginContainer) {
+                    if (value === 'default') {
+                        // Verwende den aktuellen Desktop-Hintergrund
+                        const currentBg = document.body.style.background;
+                        loginContainer.style.background = currentBg;
+                        loginContainer.style.backdropFilter = '';
+                    } else if (value === 'blur') {
+                        loginContainer.style.background = 'rgba(0, 0, 0, 0.5)';
+                        loginContainer.style.backdropFilter = 'blur(10px)';
+                    } else if (value === 'dark') {
+                        loginContainer.style.background = 'rgba(0, 0, 0, 0.8)';
+                        loginContainer.style.backdropFilter = '';
+                    } else if (value === 'light') {
+                        loginContainer.style.background = 'rgba(255, 255, 255, 0.8)';
+                        loginContainer.style.backdropFilter = '';
+                    }
+                }
+            }
+        }
+    }
+    
+    function setCustomLoginBackground(url) {
+        document.getElementById('login-container').style.background = `url('${url}') center/cover`;
+        localStorage.setItem('customLoginBg', url);
+        localStorage.setItem('loginBackground', 'custom');
+    }
+
+    // Dock-Anpassungen
+    function changeDockPosition(position) {
+        const dock = document.getElementById('dock');
+        
+        // Entferne alte Positionierung
+        dock.style.left = '';
+        dock.style.right = '';
+        dock.style.bottom = '';
+        dock.style.top = '';
+        dock.style.transform = '';
+        
+        // Setze neue Position
+        if (position === 'bottom') {
+            dock.style.left = '50%';
+            dock.style.bottom = '24px';
+            dock.style.transform = 'translateX(-50%)';
+            dock.style.flexDirection = 'row';
+        } else if (position === 'left') {
+            dock.style.left = '24px';
+            dock.style.top = '50%';
+            dock.style.transform = 'translateY(-50%)';
+            dock.style.flexDirection = 'column';
+        } else if (position === 'right') {
+            dock.style.right = '24px';
+            dock.style.top = '50%';
+            dock.style.transform = 'translateY(-50%)';
+            dock.style.flexDirection = 'column';
+        }
+        
+        localStorage.setItem('dockPosition', position);
+    }
+    
+    function changeDockSize(size) {
+        const icons = document.querySelectorAll('.app-icon');
+        icons.forEach(icon => {
+            icon.style.width = `${size}px`;
+            icon.style.height = `${size}px`;
+        });
+        localStorage.setItem('dockSize', size);
+    }
+    
+    function toggleDockAutoHide(enabled) {
+        const dock = document.getElementById('dock');
+        if (enabled) {
+            dock.classList.add('dock-autohide');
+        } else {
+            dock.classList.remove('dock-autohide');
+        }
+        localStorage.setItem('dockAutoHide', enabled);
+    }
+
+    // Schriftart ändern
+    function changeFontFamily(fontFamily) {
+        document.documentElement.style.setProperty('--font-family', fontFamily);
+        localStorage.setItem('fontFamily', fontFamily);
+    }
+
+    // Akzentfarbe ändern
+    function changeAccentColor(color) {
+        document.documentElement.style.setProperty('--accent-color', color);
+        localStorage.setItem('accentColor', color);
+    }
+
+    // Fenster-Transparenz ändern
+    function changeWindowOpacity(value) {
+        const opacity = value / 100;
+        document.documentElement.style.setProperty('--window-opacity', opacity);
+        localStorage.setItem('windowOpacity', opacity);
+    }
+
+    // Hintergrund-Deckkraft
+    function setBackgroundOpacity(value) {
+        const overlay = document.getElementById('bg-overlay') || document.createElement('div');
+        if (!document.getElementById('bg-overlay')) {
+            overlay.id = 'bg-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.zIndex = '-1';
+            document.body.appendChild(overlay);
+        }
+        
+        const opacity = 1 - (value / 100);
+        overlay.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+        localStorage.setItem('bgOpacity', value);
+    }
+
+    // Desktop-Icons anzeigen/ausblenden
+    function toggleDesktopIcons(show) {
+        const iconsContainer = document.getElementById('desktop-icons');
+        if (show) {
+            if (!iconsContainer) {
+                const container = document.createElement('div');
+                container.id = 'desktop-icons';
+                container.className = 'desktop-icons-container';
+                document.body.appendChild(container);
+                
+                // Standard-Icons hinzufügen
+                addDesktopIcon('settings.png', 'Einstellungen', 'openApp(\'settings\')');
+                addDesktopIcon('calc.png', 'Rechner', 'openApp(\'calculator\')');
+            } else {
+                iconsContainer.style.display = 'grid';
+            }
+        } else if (iconsContainer) {
+            iconsContainer.style.display = 'none';
+        }
+        localStorage.setItem('showDesktopIcons', show);
+    }
+    
+    function addDesktopIcon(icon, name, action) {
+        const container = document.getElementById('desktop-icons');
+        if (container) {
+            const iconEl = document.createElement('div');
+            iconEl.className = 'desktop-icon';
+            iconEl.innerHTML = `
+                <img src="${icon}" alt="${name}">
+                <span>${name}</span>
+            `;
+            iconEl.onclick = new Function(action);
+            container.appendChild(iconEl);
+        }
+    }
+
+    // Einstellungen exportieren/importieren
+    function exportSettings() {
+        const settings = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            settings[key] = localStorage.getItem(key);
+        }
+        
+        const blob = new Blob([JSON.stringify(settings)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'webos-settings.json';
+        a.click();
+    }
+    
+    function importSettings(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const settings = JSON.parse(e.target.result);
+                    for (const key in settings) {
+                        localStorage.setItem(key, settings[key]);
+                    }
+                    alert('Einstellungen wurden importiert. Seite wird neu geladen.');
+                    location.reload();
+                } catch (error) {
+                    alert('Fehler beim Importieren der Einstellungen: ' + error);
+                }
+            };
+            reader.readAsText(file);
+        }
+    }
+    
+    // Alle Einstellungen zurücksetzen
+    function resetAllSettings() {
+        // Speichere nur den Benutzernamen
+        const users = localStorage.getItem('users');
+        localStorage.clear();
+        if (users) localStorage.setItem('users', users);
+        
+        alert('Alle Einstellungen wurden zurückgesetzt. Seite wird neu geladen.');
+        location.reload();
+    }
+    
+    // Animationen umschalten
+    function toggleAnimations(enabled) {
+        if (enabled) {
+            document.body.classList.remove('no-animations');
+        } else {
+            document.body.classList.add('no-animations');
+        }
+        localStorage.setItem('animations', enabled);
+    }
+    
+    // Systemklänge umschalten
+    function toggleSounds(enabled) {
+        localStorage.setItem('sounds', enabled);
+    }
+    
+    // Benachrichtigungen umschalten
+    function toggleNotifications(enabled) {
+        localStorage.setItem('notifications', enabled);
+        if (enabled && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }
+    
+    // Zeitformat ändern
+    function changeTimeFormat(format) {
+        localStorage.setItem('timeFormat', format);
+        updateTimeDisplay();
+    }
+    
+    // Sprache ändern
+    function changeLanguage(lang) {
+        localStorage.setItem('language', lang);
+    }
+    
+    // Login-Logo ändern
+    function changeLoginLogo(type) {
+        const loginTitle = document.querySelector('#login-container h1');
+        if (type === 'text') {
+            loginTitle.textContent = 'WebOS Login';
+            loginTitle.style.display = 'block';
+        } else if (type === 'icon') {
+            loginTitle.innerHTML = '<img src="logo.png" alt="WebOS Logo" style="height: 80px;">';
+            loginTitle.style.display = 'block';
+        } else {
+            loginTitle.style.display = 'none';
+        }
+        localStorage.setItem('loginLogo', type);
+    }
+    
+    // Login-Stil ändern
+    function changeLoginStyle(style) {
+        const loginForm = document.querySelector('.login-form');
+        loginForm.className = 'login-form';
+        loginForm.classList.add('login-style-' + style);
+        localStorage.setItem('loginStyle', style);
+    }
+    
+    // Lade gespeicherte Einstellungen beim Start
+    function loadSavedSettings() {
+        // Lade Dock-Position
+        const savedDockPosition = localStorage.getItem('dockPosition');
+        if (savedDockPosition) changeDockPosition(savedDockPosition);
+        
+        // Lade Dock-Größe
+        const savedDockSize = localStorage.getItem('dockSize');
+        if (savedDockSize) changeDockSize(savedDockSize);
+        
+        // Lade Schriftart
+        const savedFontFamily = localStorage.getItem('fontFamily');
+        if (savedFontFamily) changeFontFamily(savedFontFamily);
+        
+        // Lade Akzentfarbe
+        const savedAccentColor = localStorage.getItem('accentColor');
+        if (savedAccentColor) changeAccentColor(savedAccentColor);
+        
+        // Lade Fenster-Transparenz
+        const savedWindowOpacity = localStorage.getItem('windowOpacity');
+        if (savedWindowOpacity) changeWindowOpacity(savedWindowOpacity);
+        
+        // Lade Hintergrund-Deckkraft
+        const savedBgOpacity = localStorage.getItem('bgOpacity');
+        if (savedBgOpacity) setBackgroundOpacity(savedBgOpacity);
+        
+        // Lade Desktop-Icons-Einstellung
+        const showDesktopIcons = localStorage.getItem('showDesktopIcons') === 'true';
+        if (showDesktopIcons) toggleDesktopIcons(true);
+        
+        // Lade Login-Hintergrund
+        const savedLoginBg = localStorage.getItem('loginBackground');
+        if (savedLoginBg) {
+            if (savedLoginBg === 'custom') {
+                const customBg = localStorage.getItem('customLoginBg');
+                if (customBg) setCustomLoginBackground(customBg);
+            } else {
+                changeLoginBackground(savedLoginBg);
+            }
+        }
+        
+        // Lade Login-Stil
+        const savedLoginStyle = localStorage.getItem('loginStyle');
+        if (savedLoginStyle) {
+            const loginForm = document.querySelector('.login-form');
+            if (loginForm) {
+                loginForm.className = 'login-form';
+                loginForm.classList.add('login-style-' + savedLoginStyle);
+            }
+        }
+        
+        // Lade Login-Logo
+        const savedLoginLogo = localStorage.getItem('loginLogo');
+        if (savedLoginLogo) changeLoginLogo(savedLoginLogo);
+        
+        // Lade Animations-Einstellung
+        const animations = localStorage.getItem('animations') !== 'false';
+        toggleAnimations(animations);
+        
+        // Lade Sprache und Zeitformat
+        const savedTimeFormat = localStorage.getItem('timeFormat');
+        if (savedTimeFormat) changeTimeFormat(savedTimeFormat);
+        
+        // Aktualisiere die Zeit im neuen Format
+        updateTime();
+    }
+
+    // Beim Laden ausführen
+    document.addEventListener('DOMContentLoaded', loadSavedSettings);
 </script>
-</body>
+
+
+</html></body></body>
 </html>
